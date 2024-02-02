@@ -21,7 +21,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button id="modal-close" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                <button id="modal-close" class="btn btn-danger" data-bs-dismiss="modal"
+                    aria-label="Close">Close</button>
                 <button onclick="saveCustomer()" id="save-btn" class="btn btn-success">Save</button>
             </div>
         </div>
@@ -43,19 +44,21 @@
         try {
             showLoader();
             closeModal('create-modal');
-
-            const response = await axios.post("/customers", {
-                name: customerName,
-                email: customerEmail,
-                mobile: customerMobile
-            });
-
-            if (response.status === 201) {
-                document.getElementById("customer-form").reset();
-                await getList(currentPage);
-            } else {
-                alert("Request failed!");
-            }
+            await axios.post('/customers', {
+                    name: customerName,
+                    email: customerEmail,
+                    mobile: customerMobile
+                })
+                .then(function(response) {
+                    if(response.status === 200){
+                        document.getElementById("customer-form").reset();
+                        getList(current_page);
+                        
+                    }
+                })
+                .catch(function(error) {
+                    alert("Request failed!");
+                });
         } catch (error) {
             console.error('Error creating customer:', error);
             alert("An error occurred while saving the customer.");

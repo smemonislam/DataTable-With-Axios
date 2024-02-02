@@ -64,62 +64,82 @@
 
 <script>
     let current_page = 1;
-    async function getList(){
+    async function getList() {
         const per_page = document.getElementById('perPage').value;
         const keyword = document.getElementById('keyword').value;
         const response = await axios.get(`/customers?page=${current_page}&perPage=${per_page}&keyword=${keyword}`);
-        
+
         updateTable(response.data);
     }
 
-    function updateTable(data){
+    function updateTable(data) {
 
         let table_list = document.getElementById('tableList');
 
-        if(!data.data.length){
+        if (!data.data.length) {
             table_list.innerHTML = '<tr><td colspan="4" class="text-center">No customers found.</td></tr>';
             return;
         }
 
-        let row_html = data.data.map(function(customer){
+        let row_html = data.data.map(function(customer) {
             return `<tr>
                         <td>${customer.id}</td>
                         <td>${customer.name}</td>
                         <td>${customer.email}</td>
                         <td>${customer.mobile}</td>  
                         <td>
-                            <button data-id="${customer.id}" class="btn editBtn btn-sm btn-outline-success">Edit</button>
+                            <button data-id="${customer.id}" class="btn btn-sm editBtn btn-outline-success">Edit</button>
                             <button data-id="${customer.id}" class="btn deleteBtn btn-sm btn-outline-danger">Delete</button>
                         </td>          
                     </tr>`
         }).join('');
 
-        table_list.innerHTML = row_html;         
+        table_list.innerHTML = row_html;
 
     }
 
-    document.getElementById('perPage').addEventListener('change', function(){
+    document.getElementById('perPage').addEventListener('change', function() {
         current_page = 1;
         getList();
     });
 
-    document.getElementById('keyword').addEventListener('change', function(){
+    document.getElementById('keyword').addEventListener('change', function() {
         current_page = 1;
         getList();
     });
-    
+
 
     function handlePrevious() {
-        if(current_page > 1){
+        if (current_page > 1) {
             current_page--;
             getList();
-        }        
+        }
     }
 
-    function handleNext(){
+    function handleNext() {
         current_page++;
         getList();
     }
     getList();
 
+    document.getElementById('tableList').addEventListener('click', function(event) {
+        const target = event.target;
+        if (target.classList.contains('deleteBtn')) {
+            const customerId = target.getAttribute('data-id');
+            handleDelete(customerId);
+
+        }
+    });
+
+    async function handleDelete(customerId) {
+        await axios.delete(`/customers/${customerId}/delete`)
+            .then(function(response) {
+                if (response.status == 200) {
+                    alert(response.data);
+                    getList(current_page);
+                }
+            }).catch(function(error) {
+                console.log(error);
+            });
+    }
 </script>

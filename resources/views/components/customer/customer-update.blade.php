@@ -10,15 +10,15 @@
                         <div class="row">
                             <div class="col-12 p-1">
                                 <label class="form-label">Customer Name *</label>
-                                <input type="text" class="form-control" id="customerNameUpdate">
+                                <input type="text" class="form-control" id="customerNameUpdate" value="">
 
                                 <label class="form-label">Customer Email *</label>
-                                <input type="text" class="form-control mb-2" id="customerEmailUpdate">
+                                <input type="text" class="form-control mb-2" id="customerEmailUpdate" value="">
 
                                 <label class="form-label">Customer Mobile *</label>
-                                <input type="text" class="form-control mb-2" id="customerMobileUpdate">
+                                <input type="text" class="form-control mb-2" id="customerMobileUpdate" value="">
 
-                                <input type="hidden" class="d-none" id="customerID">
+                                <input type="hidden" class="d-none" id="customerID" value="">
                             </div>
                         </div>
                     </div>
@@ -35,24 +35,62 @@
 
 
 <script>
-    async function fillUpUpdateForm(id) {
-        document.getElementById('customerID').value = id;
-        showLoader();
-        try {
-            const response = await axios.get(`/customers/${id}`);
-            const customerData = response.data;
-            console.log(customerData);
-            document.getElementById('customerNameUpdate').value = customerData.name;
-            document.getElementById('customerEmailUpdate').value = customerData.email;
-            document.getElementById('customerMobileUpdate').value = customerData.mobile;
-            openModal('update-modal');
-        } catch (error) {
-            console.error('Error fetching customer data:', error);
-            // Handle error appropriately
-        } finally {
-            hideLoader();
-        }
+
+
+// Assuming 'tableList' is the ID of the table container
+document.getElementById('tableList').addEventListener('click', function(event) {
+    const target = event.target;
+    if (target.classList.contains('editBtn')) {
+        const customerId = target.getAttribute('data-id');
+        handleEdit(customerId);
+        
     }
+});
+
+
+async function handleEdit(customerId) {
+   await axios.get(`/customers/${customerId}/edit`)
+   .then(function(response) {
+        const customerName = document.getElementById('customerNameUpdate');
+        const customerEmail = document.getElementById('customerEmailUpdate');
+        const customerMobile = document.getElementById('customerMobileUpdate');
+        const customerID = document.getElementById('customerID');
+
+        if (response.status === 200) {
+            customerName.value = response.data.name;
+            customerEmail.value = response.data.email;
+            customerMobile.value = response.data.mobile;
+            customerID.value = response.data.id;
+        }
+        
+   })
+   .catch(function(error){
+        alert('Request failed.');
+   });
+}
+
+
+
+
+    // async function fillUpUpdateForm(id) {
+    //     document.getElementById('customerID').value = id;
+    //     showLoader();
+    //     try {
+    //         const response = await axios.get(`/customers/${id}`);
+    //         const customerData = response.data;
+    //         console.log(customerData);
+    //         document.getElementById('customerNameUpdate').value = customerData.name;
+    //         document.getElementById('customerEmailUpdate').value = customerData.email;
+    //         document.getElementById('customerMobileUpdate').value = customerData.mobile;
+    //         openModal('update-modal');
+    //     } catch (error) {
+    //         console.error('Error fetching customer data:', error);
+    //         // Handle error appropriately
+    //     } finally {
+    //         hideLoader();
+    //     }
+    // }
+    
 
 
     async function updateCustomer() {
@@ -69,18 +107,21 @@
         try {
             closeModal('update-modal');
             showLoader();
-            const response = await axios.put(`/customers/${customerID}`, {
-                name: customerName,
-                email: customerEmail,
-                mobile: customerMobile
-            });
-
-            if (response.status === 200) {
-                document.getElementById("update-form").reset();
-                await getList(currentPage);
-            } else {
-                alert("Request failed!");
-            }
+            
+            await axios.put(`/customers/update/${customerID}`, {
+                    name: customerName,
+                    email: customerEmail,
+                    mobile: customerMobile
+                })
+                .then(function(response) {
+                    if(response.status === 200){
+                        document.getElementById("customer-form").reset();
+                        getList(current_page);                        
+                    }
+                })
+                .catch(function(error) {
+                    alert("Request failed!");
+                });
         } catch (error) {
             console.error('Error updating customer:', error);
             // Handle error appropriately
@@ -88,4 +129,5 @@
             hideLoader();
         }
     }
+
 </script>
