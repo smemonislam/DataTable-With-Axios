@@ -108,7 +108,7 @@ async function handleEdit(customerId) {
             closeModal('update-modal');
             showLoader();
             
-            await axios.put(`/customers/update/${customerID}`, {
+            await axios.put(`/customers/${customerID}`, {
                     name: customerName,
                     email: customerEmail,
                     mobile: customerMobile
